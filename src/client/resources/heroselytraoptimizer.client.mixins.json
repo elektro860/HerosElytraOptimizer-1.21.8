@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "hero.bane.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"FallFlyingMixin",
+		"SetFlagAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

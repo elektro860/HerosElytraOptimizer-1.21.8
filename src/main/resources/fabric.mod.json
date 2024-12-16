@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "heroselytraoptimizer",
+  "version": "${version}",
+  "name": "HerosElytraOptimizer",
+  "description": "Optimization to make you stop gliding immediately once you take off elytra, rather than waiting for server to tell you that you can stop gliding now",
+  "authors": [
+    "HerobaneNair",
+    "HerobaneNair (again)"
+  ],
+  "contact": {
+    "sources": "https://github.com/herobane/HerosElytraOptimizer"
+  },
+  "license": "MIT",
+  "icon": "assets/heroselytraoptimizer/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "hero.bane.HerosElytraOptimizerClient"
+    ]
+  },
+  "mixins": [
+    {
+      "config": "heroselytraoptimizer.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "fabric": "*",
+    "minecraft": "~1.21"
+  }
+}
