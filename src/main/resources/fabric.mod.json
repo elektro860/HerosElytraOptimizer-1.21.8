@@ -21,7 +21,7 @@
   },
   "mixins": [
     {
-      "config": "heroselytraoptimizer.client.mixins.json",
+      "config": "heroselytraoptimizer.mixins.json",
       "environment": "client"
     }
   ],
