@@ -2,6 +2,7 @@ package hero.bane.mixin;
 
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,14 +19,15 @@ public abstract class FallFlyingMixin {
      */
     @Inject(method = "tickFallFlying", at = @At("HEAD"), cancellable = true)
     private void addElytraRequirement(CallbackInfo ci) {
-        LivingEntity entity = (LivingEntity) (Object) this;
+        // Check if the "this" object is an instance of PlayerEntity
+        if ((Object) this instanceof PlayerEntity entity) {
+            ItemStack chestSlot = entity.getEquippedStack(EquipmentSlot.CHEST);
+            boolean hasElytra = chestSlot.isOf(Items.ELYTRA);
 
-        ItemStack chestSlot = entity.getEquippedStack(EquipmentSlot.CHEST);
-        boolean hasElytra = chestSlot.isOf(Items.ELYTRA);
-
-        if (!hasElytra) {
-            ((SetFlagAccessor) entity).callSetFlag(7, false); //This is where the fall flying tag is handled now ;-;
-            ci.cancel();
+            if (!hasElytra) {
+                entity.stopFallFlying();
+                ci.cancel();
+            }
         }
     }
 }
