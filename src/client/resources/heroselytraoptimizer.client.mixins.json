@@ -4,13 +4,13 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"FallFlyingMixin",
-		"SetFlagAccessor"
+		"RocketBoostMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
 	},
 	"mixins": [
-		"SetFlagAccessor",
-		"FallFlyingMixin"
+		"FallFlyingMixin",
+		"RocketBoostMixin"
 	]
 }

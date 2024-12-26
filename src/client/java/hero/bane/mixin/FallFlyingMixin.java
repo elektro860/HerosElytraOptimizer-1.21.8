@@ -19,11 +19,11 @@ public abstract class FallFlyingMixin {
      */
     @Inject(method = "tickFallFlying", at = @At("HEAD"), cancellable = true)
     private void addElytraRequirement(CallbackInfo ci) {
-        // Check if the "this" object is an instance of PlayerEntity
         if ((Object) this instanceof PlayerEntity entity) {
             ItemStack chestSlot = entity.getEquippedStack(EquipmentSlot.CHEST);
             boolean hasElytra = chestSlot.isOf(Items.ELYTRA);
-
+            //Wanted to add a check whenever they hit the ground but is fun to be able to glide like that :)
+            //boolean onGround = entity.fallDistance == 0.0f;
             if (!hasElytra) {
                 entity.stopFallFlying();
                 ci.cancel();
