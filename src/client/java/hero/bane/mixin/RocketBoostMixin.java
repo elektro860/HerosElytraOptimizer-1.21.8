@@ -3,11 +3,9 @@ package hero.bane.mixin;
 import hero.bane.HerosElytraOptimizerClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -38,7 +36,7 @@ public class RocketBoostMixin {
         if (user.isFallFlying()) {
             long timeInWorld = HerosElytraOptimizerClient.getTimeInWorld();
             if (timeInWorld < 30000) {
-                user.sendMessage(Text.literal("Rocket boost not available yet. Wait 30 seconds after joining the world").styled(style -> style.withColor(0xAAAAAA)), false);
+                user.sendMessage(Text.literal("Rocket boost not available yet. Wait 30 seconds after joining the world.").styled(style -> style.withColor(0xAAAAAA)), false);
                 cir.setReturnValue(TypedActionResult.fail(user.getStackInHand(hand)));
                 return;
             }
@@ -48,14 +46,14 @@ public class RocketBoostMixin {
             if (world.isClient) {
                 int latency = getPlayerPing();
                 if (latency == 0) {
-                    user.sendMessage(Text.literal("Rocket boost canceled as could not get ping correctly").styled(style -> style.withColor(0xAAAAAA)), false);
+                    user.sendMessage(Text.literal("Rocket Boost cancelled as could not get ping correctly").styled(style -> style.withColor(0xAAAAAA)), false);
                     cir.setReturnValue(TypedActionResult.fail(user.getStackInHand(hand)));
                     return;
                 }
 
                 executor.schedule(() -> {
                     applyFireworkBoostLoop(user);
-                    user.sendMessage(Text.literal("Firework boost applied after " + latency + " ms!"), false);
+                    user.sendMessage(Text.literal("Firework boost applied after " + latency + "ms!").styled(style -> style.withColor(0xFFFFFF)), false);
                 }, latency, TimeUnit.MILLISECONDS);
 
                 itemStack.decrementUnlessCreative(1, user);
@@ -70,14 +68,8 @@ public class RocketBoostMixin {
 
     @Unique
     private void applyFireworkBoostLoop(PlayerEntity player) {
-        ItemStack chestSlot = player.getEquippedStack(EquipmentSlot.CHEST);
-        boolean hasElytra = chestSlot.isOf(Items.ELYTRA);
         for (int i = 0; i < BOOST_DURATION_TICKS; i++) {
-            executor.schedule(() -> {
-                if (hasElytra) {
-                    applyFireworkBoost(player);
-                }
-            }, i * 50L, TimeUnit.MILLISECONDS);
+            executor.schedule(() -> applyFireworkBoost(player), i * 50L, TimeUnit.MILLISECONDS);
         }
     }
 
