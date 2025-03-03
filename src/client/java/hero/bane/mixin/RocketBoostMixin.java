@@ -80,7 +80,11 @@ public class RocketBoostMixin {
     private void applyFireworkBoost(PlayerEntity player) {
         Vec3d vec3d = player.getRotationVector();
         Vec3d vec3d2 = player.getVelocity();
-        player.setVelocity(vec3d2.add(vec3d.x * 0.1 + (vec3d.x * 1.5F - vec3d2.x) * 0.5F, vec3d.y * 0.1 + (vec3d.y * 1.5F - vec3d2.y) * 0.5F, vec3d.z * 0.1 + (vec3d.z * 1.5F - vec3d2.z) * 0.5F));
+        //exact code is literally just setVelocity so I just copy pasted here
+        player.setVelocity(vec3d2.add(
+                vec3d.x * 0.1 + (vec3d.x * 1.5F - vec3d2.x) * 0.5F,
+                vec3d.y * 0.1 + (vec3d.y * 1.5F - vec3d2.y) * 0.5F,
+                vec3d.z * 0.1 + (vec3d.z * 1.5F - vec3d2.z) * 0.5F));
         player.velocityModified = true;
     }
 }
