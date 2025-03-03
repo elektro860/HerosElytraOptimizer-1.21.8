@@ -20,7 +20,7 @@ import java.util.Map;
 public class HerosElytraOptimizerCommand {
     private static final MinecraftClient client = MinecraftClient.getInstance();
     private static final Logger LOGGER = LoggerFactory.getLogger(HerosElytraOptimizerCommand.class);
-    private static final Path CONFIG_PATH = Paths.get(client.runDirectory.getPath(), "config", "elytraoptimizer.txt");
+    public static final Path CONFIG_PATH = Paths.get(client.runDirectory.getPath(), "config", "elytraoptimizer.txt");
     private static final Map<String, String[]> configMap = new HashMap<>();
 
     public static void registerCommands() {

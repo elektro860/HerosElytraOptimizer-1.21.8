@@ -40,6 +40,7 @@ public class RocketBoostMixin {
             }
             case "on" -> {
                 applyFireworkBoostLoop(user);
+                HerosElytraOptimizerCommand.say("Boosting");
                 return;
             }
             case "delayed" -> {
@@ -71,20 +72,21 @@ public class RocketBoostMixin {
 
     @Unique
     private void applyFireworkBoostLoop(PlayerEntity player) {
-        for (int i = 0; i < BOOST_DURATION_TICKS; i++) {
-            HerosElytraOptimizer.executor.schedule(() -> applyFireworkBoost(player), i * 50L, TimeUnit.MILLISECONDS);
+        if(!player.isFallFlying())
+        {
+            return;
         }
-    }
-
-    @Unique
-    private void applyFireworkBoost(PlayerEntity player) {
-        Vec3d vec3d = player.getRotationVector();
-        Vec3d vec3d2 = player.getVelocity();
-        //exact code is literally just setVelocity so I just copy pasted here
-        player.setVelocity(vec3d2.add(
-                vec3d.x * 0.1 + (vec3d.x * 1.5F - vec3d2.x) * 0.5F,
-                vec3d.y * 0.1 + (vec3d.y * 1.5F - vec3d2.y) * 0.5F,
-                vec3d.z * 0.1 + (vec3d.z * 1.5F - vec3d2.z) * 0.5F));
-        player.velocityModified = true;
+        for (int i = 0; i < BOOST_DURATION_TICKS; i++) {
+            HerosElytraOptimizer.executor.schedule(() -> {
+                Vec3d vec3d = player.getRotationVector();
+                Vec3d vec3d2 = player.getVelocity();
+                //exact code is literally just setVelocity so I just copy pasted here
+                player.setVelocity(vec3d2.add(
+                        vec3d.x * 0.1 + (vec3d.x * 1.5F - vec3d2.x) * 0.5F,
+                        vec3d.y * 0.1 + (vec3d.y * 1.5F - vec3d2.y) * 0.5F,
+                        vec3d.z * 0.1 + (vec3d.z * 1.5F - vec3d2.z) * 0.5F));
+                player.velocityModified = true;
+            }, i * 50L, TimeUnit.MILLISECONDS);
+        }
     }
 }

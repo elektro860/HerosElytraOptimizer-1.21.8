@@ -2,9 +2,13 @@ package hero.bane.mixin;
 
 import hero.bane.HerosElytraOptimizer;
 import hero.bane.command.HerosElytraOptimizerCommand;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -16,38 +20,52 @@ public abstract class FallFlyingMixin {
 
     @Inject(method = "tickFallFlying", at = @At("HEAD"), cancellable = true)
     private void enforceGlideBehavior(CallbackInfo ci) {
-        if ((Object) this instanceof PlayerEntity entity) {
+        if ((Object) this instanceof PlayerEntity player) {
             String[] config = HerosElytraOptimizer.getCurrentServerConfig();
             String glideMode = config[0]; //off,delayed,on
-
-            if (!entity.isFallFlying()) {
+            if (!player.isFallFlying()) {
                 return;
             }
-
             switch (glideMode) {
                 case "off":
                     return;
                 case "on":
-                    entity.stopFallFlying();
+                    stopGliding(player);
                     ci.cancel();
                     break;
                 case "delayed":
                     int ping = HerosElytraOptimizer.getPlayerPing();
                     if (ping == 0) {
-                        HerosElytraOptimizerCommand.say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
-                        break;
+                        if(HerosElytraOptimizer.debugging) {
+                                HerosElytraOptimizerCommand.say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
+                            }
+                            break;
                     }
                     HerosElytraOptimizer.executor.schedule(() -> {
-                        if (entity.isFallFlying()) {
+                        if (player.isFallFlying()) {
                             if(HerosElytraOptimizer.debugging) {
                                 HerosElytraOptimizerCommand.say("Gliding Optimization applied after "+ping+"ms", 0xFFFF55);
                             }
-                            entity.stopFallFlying();
+                            stopGliding(player);
                         }
                     }, ping, TimeUnit.MILLISECONDS);
                     break;
                 default:
                     break;
+            }
+        }
+    }
+
+    @Unique
+    private static void stopGliding(PlayerEntity player)
+    {
+        ItemStack chestSlot = player.getEquippedStack(EquipmentSlot.CHEST);
+        if(!chestSlot.isOf(Items.ELYTRA))
+        {
+            player.stopFallFlying();
+            if(HerosElytraOptimizer.debugging)
+            {
+                HerosElytraOptimizerCommand.say("Stopped Gliding");
             }
         }
     }
