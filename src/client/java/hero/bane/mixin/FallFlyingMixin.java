@@ -1,6 +1,7 @@
 package hero.bane.mixin;
 
 import hero.bane.HerosElytraOptimizer;
+import hero.bane.command.HerosElytraOptimizerCommand;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,13 +33,18 @@ public abstract class FallFlyingMixin {
                     break;
                 case "delayed":
                     int ping = HerosElytraOptimizer.getPlayerPing();
-                    if (ping > 0) {
-                        HerosElytraOptimizer.executor.schedule(() -> {
-                            if (entity.isFallFlying()) {
-                                entity.stopFallFlying();
-                            }
-                        }, ping, TimeUnit.MILLISECONDS);
+                    if (ping == 0) {
+                        HerosElytraOptimizerCommand.say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
+                        break;
                     }
+                    HerosElytraOptimizer.executor.schedule(() -> {
+                        if (entity.isFallFlying()) {
+                            if(HerosElytraOptimizer.debugging) {
+                                HerosElytraOptimizerCommand.say("Gliding Optimization applied after "+ping+"ms", 0xFFFF55);
+                            }
+                            entity.stopFallFlying();
+                        }
+                    }, ping, TimeUnit.MILLISECONDS);
                     break;
                 default:
                     break;

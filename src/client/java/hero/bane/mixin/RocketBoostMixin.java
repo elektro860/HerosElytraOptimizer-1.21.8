@@ -1,11 +1,11 @@
 package hero.bane.mixin;
 
 import hero.bane.HerosElytraOptimizer;
+import hero.bane.command.HerosElytraOptimizerCommand;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stat.Stats;
-import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
@@ -43,13 +43,20 @@ public class RocketBoostMixin {
                 return;
             }
             case "delayed" -> {
-                int latency = HerosElytraOptimizer.getPlayerPing();
-                if (latency == 0) {
-                    user.sendMessage(Text.literal("Rocket Boost cancelled as ping could not be determined").styled(style -> style.withColor(0xAAAAAA)), false);
+                int ping = HerosElytraOptimizer.getPlayerPing();
+                if (ping == 0) {
+                    if(HerosElytraOptimizer.debugging) {
+                        HerosElytraOptimizerCommand.say("Rocket Boost cancelled as ping could not be determined",0xFF5555);
+                    }
                     cir.setReturnValue(TypedActionResult.fail(user.getStackInHand(hand)));
                     return;
                 }
-                HerosElytraOptimizer.executor.schedule(() -> applyFireworkBoostLoop(user), latency, TimeUnit.MILLISECONDS);
+                HerosElytraOptimizer.executor.schedule(() -> {
+                    if(HerosElytraOptimizer.debugging) {
+                        HerosElytraOptimizerCommand.say("Rocket Boost applied after "+ ping +"ms", 0xFFFF55);
+                    }
+                    applyFireworkBoostLoop(user);
+                }, ping, TimeUnit.MILLISECONDS);
             }
         }
 

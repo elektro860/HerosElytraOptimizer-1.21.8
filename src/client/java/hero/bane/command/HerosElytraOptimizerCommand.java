@@ -72,9 +72,9 @@ public class HerosElytraOptimizerCommand {
 
         int result = reloadConfig(true);
 
-        source.sendFeedback(net.minecraft.text.Text.of("[ElytraOptimizer] Updated for " + serverIP +
-                ": Glide=" + configMap.getOrDefault(serverIP, new String[]{"off", "off"})[0] +
-                ", Rocket=" + configMap.getOrDefault(serverIP, new String[]{"off", "off"})[1]));
+        say("Updated for " + serverIP +
+                ":\n Gliding Optimization=" + configMap.getOrDefault(serverIP, new String[]{"off", "off"})[0] +
+                ",\n Rocket Optimization=" + configMap.getOrDefault(serverIP, new String[]{"off", "off"})[1]);
 
         return result;
     }
@@ -144,9 +144,18 @@ public class HerosElytraOptimizerCommand {
         return 0;
     }
 
-    private static void say(String message) {
+    public static void say(String message) {
         if (client.player != null) {
             client.player.sendMessage(net.minecraft.text.Text.of("[ElytraOptimizer] " + message), false);
         }
     }
+
+    public static void say(String message, int color) {
+        if (client.player != null) {
+            client.player.sendMessage(net.minecraft.text.Text.literal("[ElytraOptimizer] " + message)
+                    .styled(style -> style.withColor(color)), false);
+        }
+    }
+
+
 }
