@@ -3,7 +3,7 @@
   "id": "heroselytraoptimizer",
   "version": "${version}",
   "name": "HerosElytraOptimizer",
-  "description": "Optimization to make you stop gliding immediately once you take off elytra, rather than waiting for server to tell you that you can stop gliding now",
+  "description": "Optimization to make you stop gliding immediately once you take off elytra, \nrather than waiting for server to tell you that you can stop gliding now \nand making the rocket boost client side",
   "authors": [
     "HerobaneNair",
     "HerobaneNair (again)"
@@ -16,12 +16,12 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "hero.bane.HerosElytraOptimizerClient"
+      "hero.bane.HerosElytraOptimizer"
     ]
   },
   "mixins": [
     {
-      "config": "heroselytraoptimizer.client.mixins.json",
+      "config": "heroselytraoptimizer.mixins.json",
       "environment": "client"
     }
   ],
