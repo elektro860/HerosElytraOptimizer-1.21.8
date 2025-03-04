@@ -30,23 +30,20 @@ public abstract class FallFlyingMixin {
                 case "off":
                     return;
                 case "on":
-                    stopGliding(player);
+                    stopGliding(player, "Stopped Gliding");
                     ci.cancel();
                     break;
                 case "delayed":
                     int ping = HerosElytraOptimizer.getPlayerPing();
                     if (ping == 0) {
                         if(HerosElytraOptimizer.debugging) {
-                                HerosElytraOptimizerCommand.say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
-                            }
-                            break;
+                            HerosElytraOptimizerCommand.say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
+                        }
+                        break;
                     }
                     HerosElytraOptimizer.executor.schedule(() -> {
                         if (player.isFallFlying()) {
-                            if(HerosElytraOptimizer.debugging) {
-                                HerosElytraOptimizerCommand.say("Gliding Optimization applied after "+ping+"ms", 0xFFFF55);
-                            }
-                            stopGliding(player);
+                            stopGliding(player, "Gliding Optimization applied after "+ping+"ms");
                         }
                     }, ping, TimeUnit.MILLISECONDS);
                     break;
@@ -57,7 +54,7 @@ public abstract class FallFlyingMixin {
     }
 
     @Unique
-    private static void stopGliding(PlayerEntity player)
+    private static void stopGliding(PlayerEntity player, String debugMessage)
     {
         ItemStack chestSlot = player.getEquippedStack(EquipmentSlot.CHEST);
         if(!chestSlot.isOf(Items.ELYTRA))
@@ -65,7 +62,7 @@ public abstract class FallFlyingMixin {
             player.stopFallFlying();
             if(HerosElytraOptimizer.debugging)
             {
-                HerosElytraOptimizerCommand.say("Stopped Gliding");
+                HerosElytraOptimizerCommand.say(debugMessage,0xFFFF55);
             }
         }
     }

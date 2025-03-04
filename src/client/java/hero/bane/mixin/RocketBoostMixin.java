@@ -40,7 +40,9 @@ public class RocketBoostMixin {
             }
             case "on" -> {
                 applyFireworkBoostLoop(user);
-                HerosElytraOptimizerCommand.say("Boosting");
+                if(HerosElytraOptimizer.debugging) {
+                    HerosElytraOptimizerCommand.say("Boosting",0xFFFF55);
+                }
                 return;
             }
             case "delayed" -> {
