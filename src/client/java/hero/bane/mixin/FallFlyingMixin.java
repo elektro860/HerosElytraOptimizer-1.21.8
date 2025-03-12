@@ -36,7 +36,7 @@ public abstract class FallFlyingMixin {
                 case "delayed":
                     int ping = HerosElytraOptimizer.getPlayerPing();
                     if (ping == 0) {
-                        if(HerosElytraOptimizer.debugging) {
+                        if(HerosElytraOptimizer.debugging && !player.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA)) {
                             HerosElytraOptimizerCommand.say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
                         }
                         break;

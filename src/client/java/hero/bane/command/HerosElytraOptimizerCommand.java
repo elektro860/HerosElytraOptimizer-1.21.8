@@ -27,7 +27,6 @@ public class HerosElytraOptimizerCommand {
         LOGGER.info("Registering Elytra Optimizer commands");
         reloadConfig(false); //just so it reloads config when initialized
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
-            //Really hate how it says it can be replaced with a lambda but just pushes the next line onto this one to make it illegible
             dispatcher.register(ClientCommandManager.literal("elytraoptimizer")
                     .then(ClientCommandManager.literal("debug")
                             .executes(ctx -> {
@@ -156,6 +155,4 @@ public class HerosElytraOptimizerCommand {
                     .styled(style -> style.withColor(color)), false);
         }
     }
-
-
 }
