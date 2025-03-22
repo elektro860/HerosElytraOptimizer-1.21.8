@@ -1,5 +1,6 @@
 package hero.bane.command;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import hero.bane.HerosElytraOptimizer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -11,33 +12,49 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.*;
+import java.util.*;
 
 public class HerosElytraOptimizerCommand {
     private static final MinecraftClient client = MinecraftClient.getInstance();
     private static final Logger LOGGER = LoggerFactory.getLogger(HerosElytraOptimizerCommand.class);
     public static final Path CONFIG_PATH = Paths.get(client.runDirectory.getPath(), "config", "elytraoptimizer.txt");
+    private static final Path CONFIG_PATH2 = Paths.get(client.runDirectory.getPath(), "config", "elytraoptimizer2.txt");
     private static final Map<String, String[]> configMap = new HashMap<>();
 
     public static void registerCommands() {
         LOGGER.info("Registering Elytra Optimizer commands");
-        reloadConfig(false); //just so it reloads config when initialized
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
+        reloadConfig(false);
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> { //Eventually I'll use this as the base to combine all optimizers so not going to turn into lambda
             dispatcher.register(ClientCommandManager.literal("elytraoptimizer")
+                    //Booleans
                     .then(ClientCommandManager.literal("debug")
                             .executes(ctx -> {
                                 HerosElytraOptimizer.debugging = !HerosElytraOptimizer.debugging;
-                                say("Debugging toggled "+(HerosElytraOptimizer.debugging ? "On" : "Off"));
+                                say("Debugging toggled " + (HerosElytraOptimizer.debugging ? "On" : "Off"));
                                 return 0;
                             }))
-                    .then(ClientCommandManager.literal("save")
-                            .executes(ctx -> reloadConfig(true)))
-                    .then(ClientCommandManager.literal("open")
-                            .executes(HerosElytraOptimizerCommand::openConfig))
+                    .then(ClientCommandManager.literal("instaGlide").executes(ctx -> {
+                        HerosElytraOptimizer.instantGlide = !HerosElytraOptimizer.instantGlide;
+                        say("Instant Glide toggled " + (HerosElytraOptimizer.instantGlide ? "On" : "Off"));
+                        return 0;
+                    }))
+                    //Floats
+                    .then(ClientCommandManager.literal("offset")
+                            .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                    .suggests((context, builder) -> {
+                                        builder.suggest("reset");
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(HerosElytraOptimizerCommand::setOffset)))
+                    .then(ClientCommandManager.literal("pivot")
+                            .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                    .suggests((context, builder) -> {
+                                        builder.suggest("reset");
+                                        return builder.buildFuture();
+                                    })
+                                    .executes(HerosElytraOptimizerCommand::setPivot)))
+                    //Server Specific
                     .then(ClientCommandManager.literal("glide")
                             .then(ClientCommandManager.literal("off").executes(ctx -> updateConfig(ctx, "glide", "off")))
                             .then(ClientCommandManager.literal("delayed").executes(ctx -> updateConfig(ctx, "glide", "delayed")))
@@ -45,8 +62,68 @@ public class HerosElytraOptimizerCommand {
                     .then(ClientCommandManager.literal("rocket")
                             .then(ClientCommandManager.literal("off").executes(ctx -> updateConfig(ctx, "rocket", "off")))
                             .then(ClientCommandManager.literal("delayed").executes(ctx -> updateConfig(ctx, "rocket", "delayed")))
-                            .then(ClientCommandManager.literal("on").executes(ctx -> updateConfig(ctx, "rocket", "on")))));
+                            .then(ClientCommandManager.literal("on").executes(ctx -> updateConfig(ctx, "rocket", "on"))))
+                    //Config Crap
+                    .then(ClientCommandManager.literal("save")
+                            .executes(ctx -> reloadConfig(true)))
+                    .then(ClientCommandManager.literal("open")
+                            .executes(HerosElytraOptimizerCommand::openConfig))
+            );
         });
+    }
+
+    private static int setOffset(CommandContext<FabricClientCommandSource> ctx) {
+        String input = StringArgumentType.getString(ctx, "value");
+
+        if (input.equalsIgnoreCase("reset")) {
+            HerosElytraOptimizer.offset = 0.0f;
+            saveConfig();
+            say("Offset reset to 0");
+            return 0;
+        }
+
+        try {
+            float value = Float.parseFloat(input);
+            if (value < 0.0f || value >= 0.6f) {
+                say("Invalid Input, must be >=0.0 and <0.6", 0xFF5555);
+                return 1;
+            }
+
+            HerosElytraOptimizer.offset = value;
+            saveConfig();
+            say("Offset set to " + value);
+            return 0;
+        } catch (NumberFormatException e) {
+            say("Invalid Input", 0xFF5555);
+            return 1;
+        }
+    }
+
+    private static int setPivot(CommandContext<FabricClientCommandSource> ctx) {
+        String input = StringArgumentType.getString(ctx, "value");
+
+        if (input.equalsIgnoreCase("reset")) {
+            HerosElytraOptimizer.pivot = 0.0f;
+            saveConfig();
+            say("Pivot reset to 0");
+            return 0;
+        }
+
+        try {
+            float value = Float.parseFloat(input);
+            if (value < 0.0f || value >= 1.8f) {
+                say("Invalid Input, must be >=0.0 and <1.8", 0xFF5555);
+                return 1;
+            }
+
+            HerosElytraOptimizer.pivot = value;
+            saveConfig();
+            say("Pivot set to " + value);
+            return 0;
+        } catch (NumberFormatException e) {
+            say("Invalid Input", 0xFF5555);
+            return 1;
+        }
     }
 
     private static int updateConfig(CommandContext<FabricClientCommandSource> ctx, String type, String value) {
@@ -77,7 +154,6 @@ public class HerosElytraOptimizerCommand {
 
         return result;
     }
-
 
     public static int reloadConfig(boolean save) {
         try {
@@ -124,7 +200,6 @@ public class HerosElytraOptimizerCommand {
         }
     }
 
-
     private static int openConfig(CommandContext<FabricClientCommandSource> context) {
         File file = CONFIG_PATH.toFile();
         if (!file.exists()) {
@@ -141,6 +216,77 @@ public class HerosElytraOptimizerCommand {
         }).start();
 
         return 0;
+    }
+
+    public static void loadSecondConfig() {
+        try {
+            boolean created = false;
+
+            if (!Files.exists(CONFIG_PATH2)) {
+                Files.createDirectories(CONFIG_PATH2.getParent());
+                Files.writeString(CONFIG_PATH2, """
+                // Don't touch this - use in game commands
+                offset: 0
+                pivot: 0
+                instantGlide: false
+                """);
+                created = true;
+            }
+
+            List<String> lines = Files.readAllLines(CONFIG_PATH2).stream()
+                    .map(String::trim)
+                    .filter(line -> !line.startsWith("//") && !line.isEmpty())
+                    .toList();
+
+            float offset = 0f;
+            float pivot = 0f;
+            boolean instantGlide = false;
+
+            for (String line : lines) {
+                if (line.startsWith("offset:")) {
+                    offset = parseOrZero(line.substring(7), 0.6F);
+                } else if (line.startsWith("pivot:")) {
+                    pivot = parseOrZero(line.substring(6), 1.8F);
+                } else if (line.startsWith("instantGlide:")) {
+                    instantGlide = Boolean.parseBoolean(line.substring(13).trim());
+                }
+            }
+
+            HerosElytraOptimizer.offset = offset;
+            HerosElytraOptimizer.pivot = pivot;
+            HerosElytraOptimizer.instantGlide = instantGlide;
+
+            if (created) saveConfig();
+        } catch (IOException e) {
+            LOGGER.error("Failed to load elytraoptimizer2.txt", e);
+            HerosElytraOptimizer.offset = 0f;
+            HerosElytraOptimizer.pivot = 0f;
+            HerosElytraOptimizer.instantGlide = false;
+        }
+    }
+
+    private static void saveConfig() {
+        try {
+            String configText = """
+                // Don't touch this - use in game commands
+                offset: %s
+                pivot: %s
+                instantGlide: %s
+                """.formatted(HerosElytraOptimizer.offset, HerosElytraOptimizer.pivot, HerosElytraOptimizer.instantGlide);
+
+            Files.writeString(CONFIG_PATH2, configText.stripTrailing());
+        } catch (IOException e) {
+            LOGGER.error("Failed to save elytraoptimizer2.txt", e);
+        }
+    }
+
+    private static float parseOrZero(String val, float max) {
+        try {
+            float v = Float.parseFloat(val.trim());
+            return (v >= 0 && v < max) ? v : 0;
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     public static void say(String message) {

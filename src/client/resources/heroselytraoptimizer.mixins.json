@@ -3,13 +3,12 @@
 	"package": "hero.bane.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"FallFlyingMixin"
+		"FallFlyingMixin",
+		"GlidePivotMixin",
+		"LivingEntityAccessor",
+		"RocketBoostMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
-	},
-	"mixins": [
-		"FallFlyingMixin",
-		"RocketBoostMixin"
-	]
+	}
 }
