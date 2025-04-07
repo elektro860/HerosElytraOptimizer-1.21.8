@@ -52,8 +52,13 @@ public class HerosElytraOptimizerCommand {
                             say("HUD toggled " + (HerosElytraOptimizer.showHud ? "On" : "Off"));
                             return 0;
                         })
-                        .then(ClientCommandManager.argument("linger", StringArgumentType.string())
-                                .executes(HerosElytraOptimizerCommand::linger))
+                        .then(ClientCommandManager.literal("linger")
+                                .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                        .suggests((context, builder) -> {
+                                            builder.suggest("reset");
+                                            return builder.buildFuture();
+                                        })
+                                        .executes(HerosElytraOptimizerCommand::setLinger)))
                         .then(ClientCommandManager.literal("pos")
                                 .then(ClientCommandManager.literal("x")
                                         .then(ClientCommandManager.argument("value", StringArgumentType.string())
@@ -94,7 +99,7 @@ public class HerosElytraOptimizerCommand {
         ));
     }
 
-    private static int linger(CommandContext<FabricClientCommandSource> ctx) {
+    private static int setLinger(CommandContext<FabricClientCommandSource> ctx) {
         String input = StringArgumentType.getString(ctx, "value");
 
         if (input.equalsIgnoreCase("reset")) {
