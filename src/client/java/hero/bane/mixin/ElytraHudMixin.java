@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InGameHud.class)
 public class ElytraHudMixin {
     @Unique
-    private long keepRenderTill = 0;
+    private long keepHudTill = 0;
 
     @Inject(method = "render", at = @At("TAIL"))
     private void renderHud(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
@@ -31,11 +31,11 @@ public class ElytraHudMixin {
                 (!player.isOnGround());
 
         if (check) {
-            keepRenderTill = currentTime + HerosElytraOptimizer.linger;
+            keepHudTill = currentTime + HerosElytraOptimizer.linger;
         }
 
-        if (keepRenderTill >= currentTime && !player.isOnGround()) {
-            HerosElytraOptimizer.hud.draw(context, (int) (keepRenderTill - currentTime), check);
+        if (keepHudTill >= currentTime && !player.isOnGround()) {
+            HerosElytraOptimizer.hud.draw(context, (int) (keepHudTill - currentTime), check);
         }
     }
 }
