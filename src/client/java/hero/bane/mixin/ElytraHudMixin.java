@@ -24,8 +24,10 @@ public class ElytraHudMixin {
         PlayerEntity player = HerosElytraOptimizer.client.player;
         long currentTime = System.currentTimeMillis();
 
-        boolean check = (player.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA)
-                || player.getMainHandStack().isOf(Items.MACE)) &&
+        boolean check = (
+                player.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA) ||
+                player.getMainHandStack().isOf(Items.MACE) ||
+                player.getMainHandStack().isOf(Items.WIND_CHARGE)) &&
                 (!player.isOnGround());
 
         if (check) {
