@@ -103,7 +103,7 @@ public class HerosElytraOptimizerCommand {
         String input = StringArgumentType.getString(ctx, "value");
 
         if (input.equalsIgnoreCase("reset")) {
-            HerosElytraOptimizer.linger = 1000;
+            HerosElytraOptimizer.linger = 3000;
             saveConfig();
             say("Linger reset to 1000ms");
             return 0;
@@ -111,7 +111,7 @@ public class HerosElytraOptimizerCommand {
 
         try {
             int value = Integer.parseInt(input);
-            value = Math.max(200, Math.min(value, 5000));
+            value = Math.max(250, Math.min(value, 10000));
             HerosElytraOptimizer.linger = value;
             saveConfig();
             say("Linger set to " + value + "ms");
@@ -341,7 +341,7 @@ public class HerosElytraOptimizerCommand {
             int hudX = 4;
             int hudY = 4;
             boolean showHud = true;
-            int linger = 1000;
+            int linger = 3000;
 
             for (String line : lines) {
                 if (line.startsWith("offset:")) {

@@ -36,7 +36,7 @@ public class HerosElytraOptimizer implements ClientModInitializer {
 	public static ElytraOptimizerHud hud;
 	public static int maxX;
 	public static int maxY;
-	public static int linger = 1000;
+	public static int linger = 3000;
 
 	private boolean initialized = false;
 
