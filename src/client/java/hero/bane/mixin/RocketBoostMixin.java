@@ -74,10 +74,8 @@ public class RocketBoostMixin {
 
     @Unique
     private void applyFireworkBoostLoop(PlayerEntity player) {
-        if(!player.isFallFlying())
-        {
-            return;
-        }
+        if(!player.isFallFlying() || player.isOnGround()) return;
+
         for (int i = 0; i < BOOST_DURATION_TICKS; i++) {
             HerosElytraOptimizer.executor.schedule(() -> {
                 Vec3d vec3d = player.getRotationVector();

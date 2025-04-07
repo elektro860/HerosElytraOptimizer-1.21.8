@@ -12,8 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HerosElytraOptimizerCommand {
     private static final MinecraftClient client = MinecraftClient.getInstance();
@@ -25,52 +29,140 @@ public class HerosElytraOptimizerCommand {
     public static void registerCommands() {
         LOGGER.info("Registering Elytra Optimizer commands");
         reloadConfig(false);
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> { //Eventually I'll use this as the base to combine all optimizers so not going to turn into lambda
-            dispatcher.register(ClientCommandManager.literal("elytraoptimizer")
-                    //Booleans
-                    .then(ClientCommandManager.literal("debug")
-                            .executes(ctx -> {
-                                HerosElytraOptimizer.debugging = !HerosElytraOptimizer.debugging;
-                                say("Debugging toggled " + (HerosElytraOptimizer.debugging ? "On" : "Off"));
-                                return 0;
-                            }))
-                    .then(ClientCommandManager.literal("instaGlide").executes(ctx -> {
-                        HerosElytraOptimizer.instantGlide = !HerosElytraOptimizer.instantGlide;
-                        say("Instant Glide toggled " + (HerosElytraOptimizer.instantGlide ? "On" : "Off"));
-                        return 0;
-                    }))
-                    //Floats
-                    .then(ClientCommandManager.literal("offset")
-                            .then(ClientCommandManager.argument("value", StringArgumentType.string())
-                                    .suggests((context, builder) -> {
-                                        builder.suggest("reset");
-                                        return builder.buildFuture();
-                                    })
-                                    .executes(HerosElytraOptimizerCommand::setOffset)))
-                    .then(ClientCommandManager.literal("pivot")
-                            .then(ClientCommandManager.argument("value", StringArgumentType.string())
-                                    .suggests((context, builder) -> {
-                                        builder.suggest("reset");
-                                        return builder.buildFuture();
-                                    })
-                                    .executes(HerosElytraOptimizerCommand::setPivot)))
-                    //Server Specific
-                    .then(ClientCommandManager.literal("glide")
-                            .then(ClientCommandManager.literal("off").executes(ctx -> updateConfig(ctx, "glide", "off")))
-                            .then(ClientCommandManager.literal("delayed").executes(ctx -> updateConfig(ctx, "glide", "delayed")))
-                            .then(ClientCommandManager.literal("on").executes(ctx -> updateConfig(ctx, "glide", "on"))))
-                    .then(ClientCommandManager.literal("rocket")
-                            .then(ClientCommandManager.literal("off").executes(ctx -> updateConfig(ctx, "rocket", "off")))
-                            .then(ClientCommandManager.literal("delayed").executes(ctx -> updateConfig(ctx, "rocket", "delayed")))
-                            .then(ClientCommandManager.literal("on").executes(ctx -> updateConfig(ctx, "rocket", "on"))))
-                    //Config Crap
-                    .then(ClientCommandManager.literal("save")
-                            .executes(ctx -> reloadConfig(true)))
-                    .then(ClientCommandManager.literal("open")
-                            .executes(HerosElytraOptimizerCommand::openConfig))
-            );
-        });
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
+                dispatcher.register(ClientCommandManager.literal("elytraoptimizer")
+                //Booleans
+                .then(ClientCommandManager.literal("debug")
+                        .executes(ctx -> {
+                            HerosElytraOptimizer.debugging = !HerosElytraOptimizer.debugging;
+                            say("Debugging toggled " + (HerosElytraOptimizer.debugging ? "On" : "Off"));
+                            return 0;
+                        }))
+                .then(ClientCommandManager.literal("instaGlide").executes(ctx -> {
+                    HerosElytraOptimizer.instantGlide = !HerosElytraOptimizer.instantGlide;
+                    saveConfig();
+                    say("Instant Glide toggled " + (HerosElytraOptimizer.instantGlide ? "On" : "Off"));
+                    return 0;
+                }))
+                //Hud Stuffs
+                .then(ClientCommandManager.literal("hud")
+                        .executes(ctx -> {
+                            HerosElytraOptimizer.showHud = !HerosElytraOptimizer.showHud;
+                            saveConfig();
+                            say("HUD toggled " + (HerosElytraOptimizer.showHud ? "On" : "Off"));
+                            return 0;
+                        })
+                        .then(ClientCommandManager.argument("linger", StringArgumentType.string())
+                                .executes(HerosElytraOptimizerCommand::linger))
+                        .then(ClientCommandManager.literal("pos")
+                                .then(ClientCommandManager.literal("x")
+                                        .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                                .executes(HerosElytraOptimizerCommand::setHudX)))
+                                .then(ClientCommandManager.literal("y")
+                                        .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                                .executes(HerosElytraOptimizerCommand::setHudY))))
+                )
+                //Floats
+                .then(ClientCommandManager.literal("offset")
+                        .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                .suggests((context, builder) -> {
+                                    builder.suggest("reset");
+                                    return builder.buildFuture();
+                                })
+                                .executes(HerosElytraOptimizerCommand::setOffset)))
+                .then(ClientCommandManager.literal("pivot")
+                        .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                .suggests((context, builder) -> {
+                                    builder.suggest("reset");
+                                    return builder.buildFuture();
+                                })
+                                .executes(HerosElytraOptimizerCommand::setPivot)))
+                //Server Specific
+                .then(ClientCommandManager.literal("glide")
+                        .then(ClientCommandManager.literal("off").executes(ctx -> updateConfig(ctx, "glide", "off")))
+                        .then(ClientCommandManager.literal("delayed").executes(ctx -> updateConfig(ctx, "glide", "delayed")))
+                        .then(ClientCommandManager.literal("on").executes(ctx -> updateConfig(ctx, "glide", "on"))))
+                .then(ClientCommandManager.literal("rocket")
+                        .then(ClientCommandManager.literal("off").executes(ctx -> updateConfig(ctx, "rocket", "off")))
+                        .then(ClientCommandManager.literal("delayed").executes(ctx -> updateConfig(ctx, "rocket", "delayed")))
+                        .then(ClientCommandManager.literal("on").executes(ctx -> updateConfig(ctx, "rocket", "on"))))
+                //Config Crap
+                .then(ClientCommandManager.literal("save")
+                        .executes(ctx -> reloadConfig(true)))
+                .then(ClientCommandManager.literal("open")
+                        .executes(HerosElytraOptimizerCommand::openConfig))
+        ));
     }
+
+    private static int linger(CommandContext<FabricClientCommandSource> ctx) {
+        String input = StringArgumentType.getString(ctx, "value");
+
+        if (input.equalsIgnoreCase("reset")) {
+            HerosElytraOptimizer.linger = 1000;
+            saveConfig();
+            say("Linger reset to 1000ms");
+            return 0;
+        }
+
+        try {
+            int value = Integer.parseInt(input);
+            value = Math.max(200, Math.min(value, 5000));
+            HerosElytraOptimizer.linger = value;
+            saveConfig();
+            say("Linger set to " + value + "ms");
+            return 0;
+        } catch (NumberFormatException e) {
+            say("Invalid Input for linger", 0xFF5555);
+            return 1;
+        }
+    }
+
+    private static int setHudX(CommandContext<FabricClientCommandSource> ctx) {
+        String input = StringArgumentType.getString(ctx, "value");
+
+        if (input.equalsIgnoreCase("reset")) {
+            HerosElytraOptimizer.hudX = 4;
+            saveConfig();
+            say("HUD X reset to 4");
+            return 0;
+        }
+
+        try {
+            int value = Integer.parseInt(input);
+            value = Math.max(0, Math.min(value, HerosElytraOptimizer.maxX));
+            HerosElytraOptimizer.hudX = value;
+            saveConfig();
+            say("HUD X set to " + value);
+            return 0;
+        } catch (NumberFormatException e) {
+            say("Invalid Input for X", 0xFF5555);
+            return 1;
+        }
+    }
+
+    private static int setHudY(CommandContext<FabricClientCommandSource> ctx) {
+        String input = StringArgumentType.getString(ctx, "value");
+
+        if (input.equalsIgnoreCase("reset")) {
+            HerosElytraOptimizer.hudY = 4;
+            saveConfig();
+            say("HUD Y reset to 4");
+            return 0;
+        }
+
+        try {
+            int value = Integer.parseInt(input);
+            value = Math.max(0, Math.min(value, HerosElytraOptimizer.maxY));
+            HerosElytraOptimizer.hudY = value;
+            saveConfig();
+            say("HUD Y set to " + value);
+            return 0;
+        } catch (NumberFormatException e) {
+            say("Invalid Input for Y", 0xFF5555);
+            return 1;
+        }
+    }
+
 
     private static int setOffset(CommandContext<FabricClientCommandSource> ctx) {
         String input = StringArgumentType.getString(ctx, "value");
@@ -241,6 +333,10 @@ public class HerosElytraOptimizerCommand {
             float offset = 0f;
             float pivot = 0f;
             boolean instantGlide = false;
+            int hudX = 4;
+            int hudY = 4;
+            boolean showHud = true;
+            int linger = 1000;
 
             for (String line : lines) {
                 if (line.startsWith("offset:")) {
@@ -250,11 +346,27 @@ public class HerosElytraOptimizerCommand {
                 } else if (line.startsWith("instantGlide:")) {
                     instantGlide = Boolean.parseBoolean(line.substring(13).trim());
                 }
+                else if (line.startsWith("hudX:")) {
+                    hudX = Integer.parseInt(line.substring(5).trim()); //i'm just keeping it here i don't want to make an extra variable for it
+                } else if (line.startsWith("hudY:")) {
+                    hudY = Integer.parseInt(line.substring(5).trim());
+                } else if (line.startsWith("showHud:")) {
+                    showHud = Boolean.parseBoolean(line.substring(8).trim());
+                } else if (line.startsWith("linger:")) {
+                    try {
+                        int val = Integer.parseInt(line.substring(7).trim());
+                        HerosElytraOptimizer.linger = Math.max(200, Math.min(val, 5000));
+                    } catch (NumberFormatException ignored) {}
+                }
             }
 
             HerosElytraOptimizer.offset = offset;
             HerosElytraOptimizer.pivot = pivot;
             HerosElytraOptimizer.instantGlide = instantGlide;
+            HerosElytraOptimizer.hudX = hudX;
+            HerosElytraOptimizer.hudY = hudY;
+            HerosElytraOptimizer.showHud = showHud;
+            HerosElytraOptimizer.linger = linger;
 
             if (created) saveConfig();
         } catch (IOException e) {
@@ -268,11 +380,23 @@ public class HerosElytraOptimizerCommand {
     private static void saveConfig() {
         try {
             String configText = """
-                // Don't touch this - use in game commands
-                offset: %s
-                pivot: %s
-                instantGlide: %s
-                """.formatted(HerosElytraOptimizer.offset, HerosElytraOptimizer.pivot, HerosElytraOptimizer.instantGlide);
+            // Don't touch this - use in game commands
+            offset: %s
+            pivot: %s
+            instantGlide: %s
+            hudX: %s
+            hudY: %s
+            showHud: %s
+            linger: %s
+            """.formatted(
+                    HerosElytraOptimizer.offset,
+                    HerosElytraOptimizer.pivot,
+                    HerosElytraOptimizer.instantGlide,
+                    HerosElytraOptimizer.hudX,
+                    HerosElytraOptimizer.hudY,
+                    HerosElytraOptimizer.showHud,
+                    HerosElytraOptimizer.linger);
+
 
             Files.writeString(CONFIG_PATH2, configText.stripTrailing());
         } catch (IOException e) {
