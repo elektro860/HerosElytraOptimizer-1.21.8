@@ -22,31 +22,30 @@ public class ElytraOptimizerHud {
         double dz = pos.z - player.prevZ;
 
         double totalSpeed = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        float pitch = player.getPitch();
 
-        String line1 = String.format("Total Speed: %.2f blocks/s", totalSpeed / 0.05);
-        String line2 = String.format("Fall Distance: %.2f", player.fallDistance);
-        String line3 = String.format("Pitch: %.2f°", pitch);
+        String line_speed = String.format("Total Speed: %.2f blocks/s", totalSpeed / 0.05);
+        String line_pitch = String.format("Pitch: %.2f°", player.getPitch());
+        String line_fall = String.format("Fall Distance: %.2f", player.fallDistance);
 
         int x = HerosElytraOptimizer.hudX;
         int y = HerosElytraOptimizer.hudY;
 
 
         float alphaFraction = Math.max(0f, Math.min(1f, (lingerLeft) / (float) HerosElytraOptimizer.linger));
-        int alpha = shouldntFade ? 255 : (int) (0.6f * 255 + 0.4f * 255 * alphaFraction);
-
+        int alpha = shouldntFade ? 255 : (int) (0.5f * 255 + 0.5f * 255 * alphaFraction);
         int color = (alpha << 24) | 0xFFFFFF;
-
         int baseColor2 = 0xFFFFFF;
         if (player.fallDistance > 2 && player.fallDistance < 7) {
             baseColor2 = 0xAAFFFF;
-        } else if (player.fallDistance >= 7) {
+        } else if (player.fallDistance >= 7 && player.fallDistance < 20) {
             baseColor2 = 0xAAFFAA;
+        } else if (player.fallDistance >= 20) {
+            baseColor2 = 0xFFAAAA;
         }
         int color2 = (alpha << 24) | baseColor2;
 
-        context.drawTextWithShadow(textRenderer, line1, x, y, color);
-        context.drawTextWithShadow(textRenderer, line2, x, y + 10, color2);
-        context.drawTextWithShadow(textRenderer, line3, x, y + 20, color);
+        context.drawTextWithShadow(textRenderer, line_speed, x, y, color);
+        context.drawTextWithShadow(textRenderer, line_pitch, x, y + 10, color);
+        context.drawTextWithShadow(textRenderer, line_fall, x, y + 20, color2);
     }
 }
