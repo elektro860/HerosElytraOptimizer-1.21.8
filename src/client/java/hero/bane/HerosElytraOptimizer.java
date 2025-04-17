@@ -1,7 +1,7 @@
 package hero.bane;
 
-import hero.bane.render.ElytraOptimizerHud;
 import hero.bane.command.HerosElytraOptimizerCommand;
+import hero.bane.render.ElytraOptimizerHud;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
@@ -27,8 +27,11 @@ public class HerosElytraOptimizer implements ClientModInitializer {
 	public static final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 	public static boolean debugging = false;
 	public static boolean instantGlide = false;
+	public static boolean superman = false;
 	public static float offset = 0;
 	public static float pivot = 0;
+
+	public static boolean shouldFlipHero = false;
 
 	public static boolean showHud = true;
 	public static int hudX = 4;
@@ -39,6 +42,27 @@ public class HerosElytraOptimizer implements ClientModInitializer {
 	public static int linger = 3000;
 
 	private boolean initialized = false;
+
+	public static HudIndent indentMode = HudIndent.LEFT;
+	public enum HudIndent {
+		LEFT,
+		CENTERED,
+		RIGHT;
+
+		public static HudIndent fromString(String s) {
+			return switch (s.toLowerCase()) {
+				case "left" -> LEFT;
+				case "centered" -> CENTERED;
+				case "right" -> RIGHT;
+				default -> null;
+			};
+		}
+
+		@Override
+		public String toString() {
+			return name().toLowerCase();
+		}
+	}
 
 	@Override
 	public void onInitializeClient() {

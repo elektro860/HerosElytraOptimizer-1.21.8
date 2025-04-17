@@ -15,8 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Gliding Optimization
+ * glide
+ */
+
 @Mixin(LivingEntity.class)
-public abstract class FallFlyingMixin {
+public abstract class LivingEntityMixin {
 
     @Inject(method = "tickFallFlying", at = @At("HEAD"), cancellable = true)
     private void enforceGlideBehavior(CallbackInfo ci) {

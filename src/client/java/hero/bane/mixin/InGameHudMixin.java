@@ -13,8 +13,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Elytra Hud
+ * ../render/ElytraOptimizerHud.java
+ */
+
 @Mixin(InGameHud.class)
-public class ElytraHudMixin {
+public class InGameHudMixin {
     @Unique
     private long keepHudTill = 0;
 

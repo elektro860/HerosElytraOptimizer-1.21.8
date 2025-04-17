@@ -18,16 +18,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Rocket Boost Optimization
+ * rocket
+ */
+
 @Mixin(FireworkRocketItem.class)
-public class RocketBoostMixin {
+public class FireworkRocketItemMixin {
 
     @Unique
-    private static final int BOOST_DURATION_TICKS = 10; //Hardcoded for now because users won't need to specify that
+    private static final int BOOST_DURATION_TICKS = 10; //Hardcoded for now because users shouldn't need to specify that
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     private void modifyRocketUse(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
-        if (!user.isFallFlying()) {
-            cir.setReturnValue(TypedActionResult.pass(user.getStackInHand(hand)));
+        if(HerosElytraOptimizer.client.getCurrentServerEntry() == null && !user.isFallFlying()) {
             return;
         }
 

@@ -3,13 +3,15 @@
   "package": "hero.bane.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "ElytraHudMixin",
-    "FallFlyingMixin",
-    "GlidePivotMixin",
+    "BipedEntityModelMixin",
+    "FireworkRocketItemMixin",
+    "InGameHudMixin",
     "LivingEntityAccessor",
-    "RocketBoostMixin"
+    "LivingEntityMixin",
+    "LivingEntityRendererMixin",
+    "PlayerEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-	}
+  }
 }
