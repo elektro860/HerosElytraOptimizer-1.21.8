@@ -41,7 +41,7 @@
                     .then(ClientCommandManager.literal("hack")
                             .executes(ctx -> {
                                 HerosElytraOptimizer.shouldFlipHero = !HerosElytraOptimizer.shouldFlipHero;
-                                say("Hack " + (HerosElytraOptimizer.debugging ? "Enabled" : "Disabled"));
+                                say("Hack " + (HerosElytraOptimizer.shouldFlipHero ? "Enabled" : "Disabled"));
                                 return 0;
                             }))
                     .then(ClientCommandManager.literal("instaGlide")
