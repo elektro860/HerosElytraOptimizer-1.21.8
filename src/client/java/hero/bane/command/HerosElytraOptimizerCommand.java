@@ -45,14 +45,39 @@
                                 say("Instant Glide toggled " + (HerosElytraOptimizer.instantGlide ? "On" : "Off"));
                                 return 0;
                             }))
-                    .then(ClientCommandManager.literal("forwardArms")
-                            .executes(ctx -> {
-                                HerosElytraOptimizer.superman = !HerosElytraOptimizer.superman;
-                                saveConfig();
-                                say("Superman toggled " + (HerosElytraOptimizer.superman ? "On" : "Off"));
-                                return 0;
-                            }))
-                    //Hud Stuffs
+                            .then(ClientCommandManager.literal("forwardArms")
+                                    .then(ClientCommandManager.argument("value", StringArgumentType.string())
+                                            .suggests((context, builder) -> {
+                                                builder.suggest("45°");
+                                                builder.suggest("0°");
+                                                return builder.buildFuture();
+                                            })
+                                            .executes(ctx -> {
+                                                String input = StringArgumentType.getString(ctx, "value").replace("°", "").trim();
+                                                try {
+                                                    int angle = Integer.parseInt(input);
+                                                    if (angle < 0) {
+                                                        angle += 360 * ((int) ((-angle) / 360f));
+                                                    } else if (angle > 360) {
+                                                        angle -= 360 * ((int) ((angle - 360) / 360f));
+                                                    }
+                                                    HerosElytraOptimizer.armAngle = angle;
+                                                    HerosElytraOptimizer.superman = true;
+                                                    saveConfig();
+                                                    say("Forward arms set to " + angle + "°");
+                                                    return 0;
+                                                } catch (NumberFormatException e) {
+                                                    say("Invalid input", 0xFF5555);
+                                                    return 1;
+                                                }
+                                            }))
+                                    .executes(ctx -> {
+                                        HerosElytraOptimizer.superman = !HerosElytraOptimizer.superman;
+                                        saveConfig();
+                                        say("Superman toggled " + (HerosElytraOptimizer.superman ? "On" : "Off"));
+                                        return 0;
+                                    }))
+                            //Hud Stuffs
                     .then(ClientCommandManager.literal("hud")
                             .executes(ctx -> {
                                 HerosElytraOptimizer.showHud = !HerosElytraOptimizer.showHud;
@@ -203,15 +228,9 @@
             }
 
             try {
-                float value = Float.parseFloat(input);
-                if (value < 0.0f || value >= 0.6f) {
-                    say("Invalid Input, must be >=0.0 and <0.6", 0xFF5555);
-                    return 1;
-                }
-
-                HerosElytraOptimizer.offset = value;
+                HerosElytraOptimizer.offset = Math.max(0.0f, Math.min(Float.parseFloat(input), 0.6f));
                 saveConfig();
-                say("Offset set to " + value);
+                say("Offset set to " + HerosElytraOptimizer.offset);
                 return 0;
             } catch (NumberFormatException e) {
                 say("Invalid Input", 0xFF5555);
@@ -230,15 +249,9 @@
             }
 
             try {
-                float value = Float.parseFloat(input);
-                if (value < 0.0f || value >= 1.8f) {
-                    say("Invalid Input, must be >=0.0 and <1.8", 0xFF5555);
-                    return 1;
-                }
-
-                HerosElytraOptimizer.pivot = value;
+                HerosElytraOptimizer.pivot = Math.max(0.0f, Math.min(Float.parseFloat(input), 1.8f));
                 saveConfig();
-                say("Pivot set to " + value);
+                say("Pivot set to " + HerosElytraOptimizer.pivot);
                 return 0;
             } catch (NumberFormatException e) {
                 say("Invalid Input", 0xFF5555);
@@ -338,6 +351,7 @@
             return 0;
         }
 
+        @SuppressWarnings("DuplicateExpressions")
         public static void loadSecondConfig() {
             try {
                 boolean created = false;
@@ -391,6 +405,16 @@
                         if (parsed != null) indent = parsed;
                     } else if (line.startsWith("superman:")) {
                         superman = Boolean.parseBoolean(line.substring(9).trim());
+                    } else if (line.startsWith("supermanAngle:")) {
+                        try {
+                            int angle = Integer.parseInt(line.substring(14).trim());
+                            if (angle < 0) {
+                                angle += 360 * ((int) ((-angle) / 360f));
+                            } else if (angle > 360) {
+                                angle -= 360 * ((int) ((angle - 360) / 360f));
+                            }
+                            HerosElytraOptimizer.armAngle = angle;
+                        } catch (NumberFormatException ignored) {}
                     }
                 }
 
@@ -426,6 +450,7 @@
             linger: %s
             indent: %s
             superman: %s
+            supermanAngle: %s
             """.formatted(
                         HerosElytraOptimizer.offset,
                         HerosElytraOptimizer.pivot,
@@ -435,7 +460,8 @@
                         HerosElytraOptimizer.showHud,
                         HerosElytraOptimizer.linger,
                         HerosElytraOptimizer.indentMode.toString(),
-                        HerosElytraOptimizer.superman
+                        HerosElytraOptimizer.superman,
+                        HerosElytraOptimizer.armAngle
                 );
 
                 Files.writeString(CONFIG_PATH2, configText.stripTrailing());

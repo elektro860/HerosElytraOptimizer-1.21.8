@@ -30,6 +30,7 @@ public class HerosElytraOptimizer implements ClientModInitializer {
 	public static boolean superman = false;
 	public static float offset = 0;
 	public static float pivot = 0;
+	public static int armAngle = 45;
 
 	public static boolean shouldFlipHero = false;
 

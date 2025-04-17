@@ -23,7 +23,7 @@ public abstract class BipedEntityModelMixin<T extends LivingEntity> extends Anim
     @Inject(method = "positionRightArm", at = @At("HEAD"), cancellable = true)
     private void modifyRightArmPose(T entity, CallbackInfo ci) {
         if (entity.isFallFlying() && HerosElytraOptimizer.superman) {
-            this.rightArm.pitch = (float) Math.PI;
+            this.rightArm.pitch = (float) Math.toRadians(180-HerosElytraOptimizer.armAngle);
             this.rightArm.yaw = 0;
             this.rightArm.roll = 0;
             ci.cancel();
@@ -33,7 +33,7 @@ public abstract class BipedEntityModelMixin<T extends LivingEntity> extends Anim
     @Inject(method = "positionLeftArm", at = @At("HEAD"), cancellable = true)
     private void modifyLeftArmPose(T entity, CallbackInfo ci) {
         if (entity.isFallFlying() && HerosElytraOptimizer.superman) {
-            this.leftArm.pitch = (float) Math.PI;
+            this.leftArm.pitch = (float) Math.toRadians(180-HerosElytraOptimizer.armAngle);
             this.leftArm.yaw = 0;
             this.leftArm.roll = 0;
             ci.cancel();
