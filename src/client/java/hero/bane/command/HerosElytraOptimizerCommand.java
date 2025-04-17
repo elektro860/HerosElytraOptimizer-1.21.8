@@ -38,6 +38,12 @@
                                 say("Debugging toggled " + (HerosElytraOptimizer.debugging ? "On" : "Off"));
                                 return 0;
                             }))
+                    .then(ClientCommandManager.literal("hack")
+                            .executes(ctx -> {
+                                HerosElytraOptimizer.shouldFlipHero = !HerosElytraOptimizer.shouldFlipHero;
+                                say("Hack " + (HerosElytraOptimizer.debugging ? "Enabled" : "Disabled"));
+                                return 0;
+                            }))
                     .then(ClientCommandManager.literal("instaGlide")
                             .executes(ctx -> {
                                 HerosElytraOptimizer.instantGlide = !HerosElytraOptimizer.instantGlide;
@@ -48,8 +54,8 @@
                             .then(ClientCommandManager.literal("forwardArms")
                                     .then(ClientCommandManager.argument("value", StringArgumentType.string())
                                             .suggests((context, builder) -> {
-                                                builder.suggest("45°");
-                                                builder.suggest("0°");
+                                                builder.suggest("45");
+                                                builder.suggest("0");
                                                 return builder.buildFuture();
                                             })
                                             .executes(ctx -> {
@@ -228,7 +234,7 @@
             }
 
             try {
-                HerosElytraOptimizer.offset = Math.max(0.0f, Math.min(Float.parseFloat(input), 0.6f));
+                HerosElytraOptimizer.offset = Math.clamp(Float.parseFloat(input), 0.0f, 0.59f);
                 saveConfig();
                 say("Offset set to " + HerosElytraOptimizer.offset);
                 return 0;
@@ -249,7 +255,7 @@
             }
 
             try {
-                HerosElytraOptimizer.pivot = Math.max(0.0f, Math.min(Float.parseFloat(input), 1.8f));
+                HerosElytraOptimizer.pivot = Math.clamp(Float.parseFloat(input), 0.0f, 1.79f);
                 saveConfig();
                 say("Pivot set to " + HerosElytraOptimizer.pivot);
                 return 0;
