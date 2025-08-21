@@ -20,9 +20,9 @@ public class ElytraOptimizerHud {
         TextRenderer textRenderer = HerosElytraOptimizer.client.textRenderer;
 
         Vec3d pos = player.getPos();
-        double dx = pos.x - player.prevX;
-        double dy = pos.y - player.prevY;
-        double dz = pos.z - player.prevZ;
+        double dx = pos.x - player.lastX;
+        double dy = pos.y - player.lastY;
+        double dz = pos.z - player.lastZ;
 
         double totalSpeed = Math.sqrt(dx * dx + dy * dy + dz * dz);
 

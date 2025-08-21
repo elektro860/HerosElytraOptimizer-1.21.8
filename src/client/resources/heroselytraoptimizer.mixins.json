@@ -7,7 +7,6 @@
     "FireworkRocketItemMixin",
     "InGameHudMixin",
     "LivingEntityAccessor",
-    "LivingEntityMixin",
     "LivingEntityRendererMixin",
     "PlayerEntityRendererMixin"
   ],

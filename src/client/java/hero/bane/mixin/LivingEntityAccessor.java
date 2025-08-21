@@ -6,6 +6,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(LivingEntity.class)
 public interface LivingEntityAccessor {
-    @Accessor("fallFlyingTicks")
-    void setFallFlyingTicks(int ticks); //I'm scared of access wideners
+    @Accessor("glidingTicks")
+    void setGlidingTicks(int ticks); // I'm scared of access wideners
 }

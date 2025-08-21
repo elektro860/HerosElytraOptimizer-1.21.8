@@ -23,12 +23,12 @@ import java.util.concurrent.TimeUnit;
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
 
-    @Inject(method = "tickFallFlying", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "tickGliding", at = @At("HEAD"), cancellable = true)
     private void enforceGlideBehavior(CallbackInfo ci) {
         if ((Object) this instanceof PlayerEntity player) {
             String[] config = HerosElytraOptimizer.getCurrentServerConfig();
-            String glideMode = config[0]; //off,delayed,on
-            if (!player.isFallFlying()) {
+            String glideMode = config[0]; // off,delayed,on
+            if (!player.isGliding()) {
                 return;
             }
             switch (glideMode) {
@@ -41,14 +41,16 @@ public abstract class LivingEntityMixin {
                 case "delayed":
                     int ping = HerosElytraOptimizer.getPlayerPing();
                     if (ping == 0) {
-                        if(HerosElytraOptimizer.debugging && !player.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA)) {
-                            HerosElytraOptimizerCommand.say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
+                        if (HerosElytraOptimizer.debugging
+                                && !player.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA)) {
+                            HerosElytraOptimizerCommand
+                                    .say("Gliding Optimization cancelled as ping could not be determined", 0xFF5555);
                         }
                         break;
                     }
                     HerosElytraOptimizer.executor.schedule(() -> {
-                        if (player.isFallFlying()) {
-                            stopGliding(player, "Gliding Optimization applied after "+ping+"ms");
+                        if (player.isGliding()) {
+                            stopGliding(player, "Gliding Optimization applied after " + ping + "ms");
                         }
                     }, ping, TimeUnit.MILLISECONDS);
                     break;
@@ -59,15 +61,12 @@ public abstract class LivingEntityMixin {
     }
 
     @Unique
-    private static void stopGliding(PlayerEntity player, String debugMessage)
-    {
+    private static void stopGliding(PlayerEntity player, String debugMessage) {
         ItemStack chestSlot = player.getEquippedStack(EquipmentSlot.CHEST);
-        if(!chestSlot.isOf(Items.ELYTRA))
-        {
-            player.stopFallFlying();
-            if(HerosElytraOptimizer.debugging)
-            {
-                HerosElytraOptimizerCommand.say(debugMessage,0xFFFF55);
+        if (!chestSlot.isOf(Items.ELYTRA)) {
+            player.isGliding();
+            if (HerosElytraOptimizer.debugging) {
+                HerosElytraOptimizerCommand.say(debugMessage, 0xFFFF55);
             }
         }
     }
